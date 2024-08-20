@@ -1,0 +1,45 @@
+name: Generate and Trigger Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  generate_workflow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Generate new workflow with 3 jobs
+        run: |
+          cat <<EOF > .github/workflows/generated_workflow.yml
+          name: Generated Workflow
+
+          on:
+            workflow_call:
+
+          jobs:
+            job1:
+              runs-on: ubuntu-latest
+              steps:
+                - name: Step in Job 1
+                  run: echo "Hello from Job 1!"
+
+            job2:
+              runs-on: ubuntu-latest
+              steps:
+                - name: Step in Job 2
+                  run: echo "Hello from Job 2!"
+
+            job3:
+              runs-on: ubuntu-latest
+              steps:
+                - name: Step in Job 3
+                  run: echo "Hello from Job 3!"
+          EOF
+
+  trigger_generated_workflow:
+    needs: generate_workflow
+    uses: ./.github/workflows/generated_workflow.yml
