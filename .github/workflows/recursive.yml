@@ -37,6 +37,6 @@ jobs:
     if: ${{ needs.check-json-depth.outputs.depth > 1 }}
     steps:
       - name: Trigger
-        uses: .github/workflows/resursive.yml
+        uses: kamilchodola/test_dynamic_workflows/.github/workflows/resursive.yml@main
         with:
           json: ${{ needs.check-json-depth.outputs.reduced_json }}
