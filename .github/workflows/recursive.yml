@@ -15,11 +15,11 @@ jobs:
       reduced_json: ${{ steps.check.outputs.reduced_json }}
     steps:
       - name: Do action
-        run: echo "Action on input '${{ github.event.inputs.json_input }}'"
+        run: echo "Action on input '${{ inputs.json_input }}'"
 
       - name: Set input JSON
         id: json-input
-        run: echo '${{ github.event.inputs.json_input }}' > input.json
+        run: echo '${{ inputs.json_input }}' > input.json
 
       - name: Check JSON Depth and Reduce
         id: check
@@ -32,9 +32,9 @@ jobs:
           echo "Reduced JSON: $REDUCED_JSON"
 
   retrigger:
-    needs: [start]
-    if: ${{ needs.check-json-depth.outputs.depth > 1 }}
-    name: Trigger
+    needs: start
+    if: ${{ needs.start.outputs.depth > 1 }}
+    runs-on: ubuntu-latest
     uses: kamilchodola/test_dynamic_workflows/.github/workflows/recursive.yml@main
     with:
-      json: ${{ needs.check-json-depth.outputs.reduced_json }}
+      json_input: ${{ needs.start.outputs.reduced_json }}
