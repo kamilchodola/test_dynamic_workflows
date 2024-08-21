@@ -35,6 +35,6 @@ jobs:
     needs: [start]
     if: ${{ needs.check-json-depth.outputs.depth > 1 }}
     name: Trigger
-    uses: kamilchodola/test_dynamic_workflows/.github/workflows/resursive.yml@main
+    uses: kamilchodola/test_dynamic_workflows/.github/workflows/recursive.yml@main
     with:
       json: ${{ needs.check-json-depth.outputs.reduced_json }}
