@@ -13,6 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger First Level
-        uses: .github/workflows/resursive.yml
+        uses: kamilchodola/test_dynamic_workflows/.github/workflows/resursive.yml@main
         with:
           json: ${{ github.event.inputs.json_input }}
