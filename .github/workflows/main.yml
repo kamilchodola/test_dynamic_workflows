@@ -15,7 +15,7 @@ jobs:
       - name: Read the JSON file and create matrix
         id: set-matrix
         run: |
-          jobs=$(cat .github/workflows/jobs.json | jq -c '.jobs[]')
+          jobs=$(cat .github/workflows/jobs.json | jq '.' )
           echo "matrix=$jobs" >> $GITHUB_OUTPUT
           echo $jobs
 
