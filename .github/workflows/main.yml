@@ -15,8 +15,9 @@ jobs:
       - name: Read the JSON file and create matrix
         id: set-matrix
         run: |
-          jobs=$(cat jobs.json | jq -c '.jobs[]')
+          jobs=$(cat .github/workflows/jobs.json | jq -c '.jobs[]')
           echo "matrix=$jobs" >> $GITHUB_OUTPUT
+          echo $jobs
 
   dynamic-jobs:
     needs: generate-matrix
@@ -27,15 +28,22 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Download Artifact for Dependencies
-        if: ${{ matrix.job.dependencies && matrix.job.dependencies != '' }}
+      - name: Set up Python Environment
         run: |
-          for dep in ${{ matrix.job.dependencies }}; do
-            echo "Downloading artifact for $dep..."
-            actions/download-artifact@v2 --name "$dep-output" --path artifacts/
-          done
+          python -m pip install --upgrade pip
+          pip install pygithub
+
+      - name: Set up GitHub CLI with GITHUB_TOKEN
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+
+      - name: Wait and Download Artifacts for Dependencies
+        if: ${{ matrix.job.dependencies && matrix.job.dependencies != '' }}
+        env:
+          DEPENDENCIES_JSON: ${{ toJson(matrix.job.dependencies) }}
+        run: python wait_and_download.py
 
       - name: Run Job Logic
         run: |
@@ -47,7 +55,7 @@ jobs:
           echo "${matrix.job.name} output" > output.txt
 
       - name: Upload Job Output
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.job.name }}-output
           path: output.txt
