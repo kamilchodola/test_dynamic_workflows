@@ -2,15 +2,52 @@ name: Matrix Job Workflow
 
 on: 
   workflow_dispatch: 
-    inputs:
-      json_input:
-        description: 'Input JSON to start the recursive workflow'
-        required: true
-        type: string
 
 jobs:
-  start:
-    name: Trigger First Level
-    uses: kamilchodola/test_dynamic_workflows/.github/workflows/recursive.yml@main
-    with:
-      json: ${{ github.event.inputs.json_input }}
+  generate-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Read the JSON file and create matrix
+        id: set-matrix
+        run: |
+          jobs=$(cat jobs.json | jq -c '.jobs[]')
+          echo "matrix=$jobs" >> $GITHUB_OUTPUT
+
+  dynamic-jobs:
+    needs: generate-matrix
+    strategy:
+      matrix:
+        job: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
+    runs-on: ${{ matrix.job.runs_on }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Download Artifact for Dependencies
+        if: ${{ matrix.job.dependencies && matrix.job.dependencies != '' }}
+        run: |
+          for dep in ${{ matrix.job.dependencies }}; do
+            echo "Downloading artifact for $dep..."
+            actions/download-artifact@v2 --name "$dep-output" --path artifacts/
+          done
+
+      - name: Run Job Logic
+        run: |
+          echo "Running ${matrix.job.name} with input from dependencies"
+          cat artifacts/*
+
+      - name: Save Job Output
+        run: |
+          echo "${matrix.job.name} output" > output.txt
+
+      - name: Upload Job Output
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.job.name }}-output
+          path: output.txt
