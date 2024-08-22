@@ -20,7 +20,8 @@ jobs:
           echo "matrix=$jobs" >> $GITHUB_OUTPUT
 
       - name: Debug Output
-        run: echo "Matrix: ${{ steps.set-matrix.outputs.matrix }}"
+        run: |
+          echo "Matrix: ${{ steps.set-matrix.outputs.matrix }}"
 
   dynamic-jobs:
     needs: generate-matrix
