@@ -16,7 +16,7 @@ jobs:
         id: set-matrix
         run: |
           # Read and set matrix in one line to avoid formatting issues
-          jobs=$(jq -c '.' jobs.json)
+          jobs=$(jq -c '.' .github/workflows/jobs.json)
           echo "matrix=$jobs" >> $GITHUB_OUTPUT
 
       - name: Debug Output
