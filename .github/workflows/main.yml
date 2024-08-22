@@ -49,17 +49,27 @@ jobs:
           DEPENDENCIES_JSON: ${{ toJson(matrix.job.dependencies) }}
         run: python .github/workflows/wait_and_download.py
 
+      - name: Check for FAILURE
+        if: ${{ matrix.job.dependencies && matrix.job.dependencies != '' }}
+        run: |
+          if grep -q "FAILURE" artifacts/output.txt; then
+            echo "Dependency job failed, skipping this step."
+            exit 0
+          fi
+
       - name: Run Job Logic
         run: |
           echo "Running ${{ matrix.job.name }} with input from dependencies"
-          ls artifacts/*
+          ls
+          echo "SUCCESS" > output.txt  # Optional, indicating success
 
-      - name: Save Job Output
-        run: |
-          echo "${matrix.job.name} output" > output.txt
+      - name: Create FAILURE artifact on error
+        if: failure()
+        run: echo "FAILURE" > output.txt
 
-      - name: Upload Job Output
-        uses: actions/upload-artifact@v4
+      - name: Ensure Artifact Creation
+        if: always()
+        uses: actions/upload-artifact@v4.1.8
         with:
           name: ${{ matrix.job.name }}-output
           path: output.txt
