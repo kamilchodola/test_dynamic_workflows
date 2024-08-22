@@ -8,22 +8,12 @@
     {
       "name": "job2",
       "runs_on": "ubuntu-latest",
-      "dependencies": [
-        {
-          "dependency": "job1",
-          "timeout": 120
-        }
-      ]
+      "dependencies": [ "job1" ]
     },
     {
       "name": "job3",
       "runs_on": "ubuntu-latest",
-      "dependencies": [
-        {
-          "dependency": "job2",
-          "timeout": 60
-        }
-      ]
+      "dependencies":  [ "job2" ]
     }
   ]
 }
