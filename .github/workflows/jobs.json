@@ -1,19 +1,27 @@
-{
-  "jobs": [
-    {
-      "name": "job1",
-      "runs_on": "ubuntu-latest",
-      "dependencies": []
-    },
-    {
-      "name": "job2",
-      "runs_on": "ubuntu-latest",
-      "dependencies": [ "job1" ]
-    },
-    {
-      "name": "job3",
-      "runs_on": "ubuntu-latest",
-      "dependencies":  [ "job2" ]
-    }
-  ]
-}
+[
+  {
+    "name": "job1",
+    "runs_on": "ubuntu-latest",
+    "dependencies": []
+  },
+  {
+    "name": "job2",
+    "runs_on": "ubuntu-latest",
+    "dependencies": [
+      {
+        "dependency": "job1",
+        "timeout": 120
+      }
+    ]
+  },
+  {
+    "name": "job3",
+    "runs_on": "ubuntu-latest",
+    "dependencies": [
+      {
+        "dependency": "job2",
+        "timeout": 60
+      }
+    ]
+  }
+]
