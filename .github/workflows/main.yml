@@ -51,7 +51,7 @@ jobs:
 
       - name: Run Job Logic
         run: |
-          echo "Running ${matrix.job.name} with input from dependencies"
+          echo "Running ${{ matrix.job.name }} with input from dependencies"
           cat artifacts/*
 
       - name: Save Job Output
