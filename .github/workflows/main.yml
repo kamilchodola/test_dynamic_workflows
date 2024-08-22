@@ -47,7 +47,7 @@ jobs:
         if: ${{ matrix.job.dependencies && matrix.job.dependencies != '' }}
         env:
           DEPENDENCIES_JSON: ${{ toJson(matrix.job.dependencies) }}
-        run: python wait_and_download.py
+        run: python .github/workflows/wait_and_download.py
 
       - name: Run Job Logic
         run: |
