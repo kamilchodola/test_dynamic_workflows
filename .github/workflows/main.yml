@@ -15,9 +15,12 @@ jobs:
       - name: Read the JSON file and create matrix
         id: set-matrix
         run: |
-          jobs=$(cat .github/workflows/jobs.json | jq '.' )
+          # Read and set matrix in one line to avoid formatting issues
+          jobs=$(jq -c '.' jobs.json)
           echo "matrix=$jobs" >> $GITHUB_OUTPUT
-          echo $jobs
+
+      - name: Debug Output
+        run: echo "Matrix: ${{ steps.set-matrix.outputs.matrix }}"
 
   dynamic-jobs:
     needs: generate-matrix
