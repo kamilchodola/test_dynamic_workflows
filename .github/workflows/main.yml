@@ -54,7 +54,7 @@ jobs:
         id: job-logic
         run: |
           echo "Running ${{ matrix.job.name }} with input from dependencies"
-          sleep 180
+          sleep 120
           echo "SUCCESS" > output.txt
 
       - name: Create FAILURE artifact on error
