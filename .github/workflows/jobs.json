@@ -23,5 +23,25 @@
         "timeout": 60
       }
     ]
-  }
+  },
+  {
+    "name": "job4",
+    "runs_on": "ubuntu-latest",
+    "dependencies": []
+  },
+  {
+    "name": "job5",
+    "runs_on": "ubuntu-latest",
+    "dependencies": []
+  },
+  {
+    "name": "job6",
+    "runs_on": "ubuntu-latest",
+    "dependencies": [
+      {
+        "dependency": "job5",
+        "timeout": 60
+      }
+    ]
+  },
 ]
