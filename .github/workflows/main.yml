@@ -41,19 +41,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install pygithub
 
-      - name: Wait and Download Artifacts for Dependencies
+      - name: Set up GitHub CLI with GITHUB_TOKEN
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+
+      - name: Verify dependent job output
         if: ${{ matrix.job.dependencies && matrix.job.dependencies != '' }}
         env:
           DEPENDENCIES_JSON: ${{ toJson(matrix.job.dependencies) }}
         run: python .github/workflows/wait_and_download.py
-
-      - name: Check for FAILURE
-        if: ${{ matrix.job.dependencies && matrix.job.dependencies != '' }}
-        run: |
-          if grep -q "FAILURE" artifacts/output.txt; then
-            echo "Dependency job failed, skipping this step."
-            exit 0
-          fi
 
       - name: Run Job Logic
         run: |
