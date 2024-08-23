@@ -46,3 +46,17 @@ for dep_info in dependencies:
     if not success:
         print(f"Timeout reached for {dep_name} after {timeout_minutes} minutes. Exiting...")
         sys.exit(1)
+
+    # Check the contents of the artifact for the word "FAILURE"
+    try:
+        with open(f"artifacts/output.txt", "r") as f:
+            contents = f.read().strip()
+            if "FAILURE" in contents:
+                print(f"Dependency job {dep_name} failed, skipping this job.")
+                sys.exit(0)  # Exit with 0 to skip further job execution
+    except FileNotFoundError:
+        print(f"Artifact for {dep_name} was not found after download.")
+        sys.exit(1)
+
+# Continue with the rest of the job if no "FAILURE" was detected
+print("All dependencies succeeded, continuing with the job...")
