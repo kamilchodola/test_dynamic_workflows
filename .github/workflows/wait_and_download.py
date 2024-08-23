@@ -7,8 +7,8 @@ from datetime import datetime, timedelta
 
 dependencies_json = os.getenv("DEPENDENCIES_JSON", "[]")
 dependencies = json.loads(dependencies_json)
-
 run_id = os.getenv("GITHUB_RUN_ID")
+artifact_name = os.getenv("ARTIFACT_NAME", "output")
 
 def run_command(command):
     try:
@@ -31,14 +31,14 @@ for dep_info in dependencies:
     while (datetime.now() - start_time).total_seconds() < timeout_seconds:
         print(f"Attempting to download artifact from {dep_name} with run ID {run_id}...")
 
-        command = f'gh run download --name "{dep_name}-output-{run_id}" --dir "artifacts/" --repo "{os.getenv("GITHUB_REPOSITORY")}"'
+        command = f'gh run download --name "{dep_name}-{artifact_name}-{run_id}" --dir "artifacts/" --repo "{os.getenv("GITHUB_REPOSITORY")}"'
         
         if run_command(command):
             print(f"Successfully downloaded {dep_name} artifact.")
             success = True
             break
         else:
-            print(f"Artifact from {dep_name} not available yet, retrying in 30 seconds...")
+            print(f"Artifact from {dep_name} not available yet, retrying in 10 seconds...")
             time.sleep(10)  # Check every 10 seconds on dependency
             
     if not success:
@@ -46,7 +46,7 @@ for dep_info in dependencies:
         sys.exit(1)
 
     try:
-        with open(f"artifacts/output.txt", "r") as f:
+        with open(f"artifacts/{artifact_name}.txt", "r") as f:
             contents = f.read().strip()
             if "FAILURE" in contents:
                 print(f"Dependency job {dep_name} failed, skipping this job.")
