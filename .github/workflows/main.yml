@@ -59,16 +59,16 @@ jobs:
             exit 1
           else
             echo "Exiting with status 0"            
-            echo "SUCCESS" > output.txt
+            echo "SUCCESS" > ${{ matrix.job.name }}-status.txt
           fi
           
       - name: Create FAILURE artifact on error
         if: failure()
         run: |
           if [ "${{ steps.verify-job.outcome }}" == "failure" ]; then
-            echo "FAILURE-78" > output.txt  # Dependent job failed
+            echo "FAILURE-78" > ${{ matrix.job.name }}-status.txt  # Dependent job failed
           elif [ "${{ steps.job-logic.outcome }}" == "failure" ]; then
-            echo "FAILURE-1" > output.txt   # Job logic failed
+            echo "FAILURE-1" > ${{ matrix.job.name }}-status.txt   # Job logic failed
           fi
 
       - name: Ensure Artifact Creation
@@ -76,7 +76,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.job.name }}-output-${{ github.run_id }}
-          path: ${{ matrix.job.name }}-output.txt
+          path: ${{ matrix.job.name }}-status.txt
 
   generate-summary:
     if: always()
