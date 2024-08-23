@@ -45,7 +45,7 @@ for dep_info in dependencies:
         sys.exit(1)
 
     try:
-        with open(f"artifacts/{dep_name}-output.txt", "r") as f:
+        with open(f"artifacts/{dep_name}-status.txt", "r") as f:
             contents = f.read().strip()
             if "FAILURE" in contents:
                 print(f"Dependency job {dep_name} failed, skipping this job.")
