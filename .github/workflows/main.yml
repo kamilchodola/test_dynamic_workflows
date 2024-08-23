@@ -76,7 +76,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.job.name }}-output-${{ github.run_id }}
-          path: output.txt
+          path: ${{ matrix.job.name }}-output.txt
 
   generate-summary:
     if: always()
