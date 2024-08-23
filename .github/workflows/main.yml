@@ -17,13 +17,9 @@ jobs:
       - name: Read the JSON file and create matrix
         id: set-matrix
         run: |
-          # Read and set matrix in one line to avoid formatting issues
           jobs=$(jq -c '.' .github/workflows/jobs.json)
+          echo $jobs
           echo "matrix=$jobs" >> $GITHUB_OUTPUT
-
-      - name: Debug Output
-        run: |
-          echo "Matrix: ${{ steps.set-matrix.outputs.matrix }}"
 
   dynamic-jobs:
     needs: generate-matrix
@@ -54,8 +50,7 @@ jobs:
       - name: Run Job Logic
         run: |
           echo "Running ${{ matrix.job.name }} with input from dependencies"
-          ls
-          echo "SUCCESS" > output.txt  # Optional, indicating success
+          exit 1
 
       - name: Create FAILURE artifact on error
         if: failure()
