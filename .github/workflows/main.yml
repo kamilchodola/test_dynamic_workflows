@@ -47,7 +47,6 @@ jobs:
         env:
           DEPENDENCIES_JSON: ${{ toJson(matrix.job.dependencies) }}
           GITHUB_RUN_ID: ${{ github.run_id }}
-          ARTIFACT_NAME: ${{ matrix.job.name }
         run: python .github/workflows/wait_and_download.py
 
       - name: Run Job Logic
@@ -63,5 +62,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.job.name }}-${{ github.run_id }}
+          name: ${{ matrix.job.name }}-output-${{ github.run_id }}
           path: output.txt
