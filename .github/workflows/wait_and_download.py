@@ -9,6 +9,9 @@ from datetime import datetime, timedelta
 dependencies_json = os.getenv("DEPENDENCIES_JSON", "[]")
 dependencies = json.loads(dependencies_json)
 
+# Get the current GitHub Run ID from the environment
+run_id = os.getenv("GITHUB_RUN_ID")
+
 # Function to run a command and return success or failure
 def run_command(command):
     try:
@@ -30,10 +33,10 @@ for dep_info in dependencies:
     success = False
 
     while (datetime.now() - start_time).total_seconds() < timeout_seconds:
-        print(f"Attempting to download artifact from {dep_name}...")
+        print(f"Attempting to download artifact from {dep_name} with run ID {run_id}...")
 
         # Command to download the artifact using the GitHub CLI
-        command = f'gh run download --name "{dep_name}-output" --dir "artifacts/" --repo "{os.getenv("GITHUB_REPOSITORY")}"'
+        command = f'gh run download --name "{dep_name}-output-{run_id}" --dir "artifacts/" --repo "{os.getenv("GITHUB_REPOSITORY")}"'
         
         if run_command(command):
             print(f"Successfully downloaded {dep_name} artifact.")
