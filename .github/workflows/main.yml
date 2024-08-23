@@ -135,14 +135,14 @@ jobs:
               echo "$dep --> $job" >> summary.md
             done
           done
-
-          echo '```' >> summary.md
     
           # Add class definitions for Mermaid diagram
           echo "classDef success fill:#4CAF50,stroke:#333,stroke-width:2px;" >> summary.md
           echo "classDef failed fill:#F44336,stroke:#333,stroke-width:2px;" >> summary.md
           echo "classDef cancelled fill:#FFC107,stroke:#333,stroke-width:2px;" >> summary.md
           echo "classDef unknown fill:#D3D3D3,stroke:#333,stroke-width:2px;" >> summary.md
+          
+          echo '```' >> summary.md
 
           # Add the summary to GitHub's special summary markdown file
           cat summary.md >> $GITHUB_STEP_SUMMARY
