@@ -10,7 +10,7 @@
     "dependencies": [
       {
         "dependency": "job1",
-        "timeout": 120
+        "timeout": 1
       }
     ]
   },
