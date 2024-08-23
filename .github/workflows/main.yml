@@ -107,8 +107,10 @@ jobs:
           echo "### Dependency Diagram" >> summary.md
           echo '```mermaid' >> summary.md
           echo "graph TD" >> summary.md
+          ls
+          ls artifacts
 
-          for file in $(ls *-output-${{ github.run_id }}); do
+          for file in $(ls artifacts); do
             job_name=$(echo $file | sed 's/-output.*//')
             job_status=$(cat $file)
             
