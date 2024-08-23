@@ -24,6 +24,7 @@ jobs:
   dynamic-jobs:
     needs: generate-matrix
     strategy:
+      fail-fast: false
       matrix:
         job: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
     runs-on: ${{ matrix.job.runs_on }}
