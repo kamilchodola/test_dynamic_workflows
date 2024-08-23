@@ -43,6 +43,7 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
 
       - name: Verify dependent job output
+        id: verify-job
         if: ${{ matrix.job.dependencies && matrix.job.dependencies != '' }}
         env:
           DEPENDENCIES_JSON: ${{ toJson(matrix.job.dependencies) }}
@@ -50,13 +51,20 @@ jobs:
         run: python .github/workflows/wait_and_download.py
 
       - name: Run Job Logic
+        id: job-logic
         run: |
           echo "Running ${{ matrix.job.name }} with input from dependencies"
           sleep 180
+          echo "SUCCESS" > output.txt
 
       - name: Create FAILURE artifact on error
         if: failure()
-        run: echo "FAILURE" > output.txt
+        run: |
+          if [ "${{ steps.verify-job.outcome }}" == "failure" ]; then
+            echo "FAILURE-78" > output.txt  # Dependent job failed
+          elif [ "${{ steps.job-logic.outcome }}" == "failure" ]; then
+            echo "FAILURE-1" > output.txt   # Job logic failed
+          fi
 
       - name: Ensure Artifact Creation
         if: always()
@@ -64,3 +72,57 @@ jobs:
         with:
           name: ${{ matrix.job.name }}-output-${{ github.run_id }}
           path: output.txt
+
+  generate-summary:
+    needs: dynamic-jobs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all output artifacts from this run
+        uses: actions/download-artifact@v4
+        with:
+          name: '*-output-${{ github.run_id }}'
+
+      - name: Generate Mermaid Diagram from output.txt files
+        run: |
+          echo "## Job Summary" >> summary.md
+          echo "" >> summary.md
+
+          # Mermaid diagram creation
+          echo "### Dependency Diagram" >> summary.md
+          echo '```mermaid' >> summary.md
+          echo "graph TD" >> summary.md
+
+          for file in $(ls *-output-${{ github.run_id }}); do
+            job_name=$(echo $file | sed 's/-output.*//')
+            job_status=$(cat $file)
+            
+            # Color based on output content
+            if [[ "$job_status" == "FAILURE" ]]; then
+              echo "$job_name[$job_name - Failed]:::failed" >> summary.md
+            elif [[ "$job_status" == "FAILURE-78" ]]; then
+              echo "$job_name[$job_name - Cancelled]:::cancelled" >> summary.md
+            else
+              echo "$job_name[$job_name - Success]:::success" >> summary.md
+            fi
+
+            # Assume dependencies are inferred from filenames or pre-known
+            if [[ -f ".github/workflows/jobs.json" ]]; then
+              dependencies=$(jq -r --arg job_name "$job_name" '.[] | select(.name == $job_name) | .dependencies[]?.dependency' .github/workflows/jobs.json)
+              for dep in $dependencies; do
+                echo "$dep --> $job_name" >> summary.md
+              done
+            fi
+          done
+
+          echo '```' >> summary.md
+          
+          # Add class definitions for Mermaid diagram
+          echo "classDef success fill:#4CAF50,stroke:#333,stroke-width:2px;" >> summary.md
+          echo "classDef failed fill:#F44336,stroke:#333,stroke-width:2px;" >> summary.md
+          echo "classDef cancelled fill:#FFC107,stroke:#333,stroke-width:2px;" >> summary.md
+
+          # Add the summary to GitHub's special summary markdown file
+          cat summary.md >> $GITHUB_STEP_SUMMARY
