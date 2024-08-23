@@ -99,7 +99,7 @@ jobs:
             gh run download --name "$job-output-${{ github.run_id }}" --dir artifacts/$job || echo "$job artifact not found, skipping"
           done
 
-      - name: Generate Mermaid Diagram from output.txt files
+      - name: Generate Mermaid Diagram from status.txt files
         run: |
           echo "## Job Summary" >> summary.md
           echo "" >> summary.md
@@ -112,9 +112,9 @@ jobs:
           # Parse jobs from jobs.json
           jobs=$(jq -r '.[].name' .github/workflows/jobs.json)
           for job in $jobs; do
-            job_file="artifacts/$job-output.txt"
+            job_file="artifacts/$job-status.txt"
       
-            # Check if the output file exists
+            # Check if the status file exists
             if [[ -f "$job_file" ]]; then
               job_status=$(cat $job_file)
         
