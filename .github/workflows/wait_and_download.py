@@ -56,7 +56,7 @@ for dep_info in dependencies:
             contents = f.read().strip()
             if "FAILURE" in contents:
                 print(f"Dependency job {dep_name} failed, skipping this job.")
-                sys.exit(0)  # Exit with 0 to skip further job execution
+                sys.exit(1)  # Exit with 0 to skip further job execution
     except FileNotFoundError:
         print(f"Artifact for {dep_name} was not found after download.")
         sys.exit(1)
