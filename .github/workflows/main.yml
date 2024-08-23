@@ -74,6 +74,7 @@ jobs:
           path: output.txt
 
   generate-summary:
+    if: always()
     needs: dynamic-jobs
     runs-on: ubuntu-latest
     steps:
