@@ -93,6 +93,7 @@ jobs:
       - name: Download all output artifacts from matrix jobs
         run: |
           jobs=$(jq -r '.[].name' .github/workflows/jobs.json)
+          mkdir -p artifacts
           for job in $jobs; do
             echo "Downloading artifact for $job"
             gh run download --name "$job-output-${{ github.run_id }}" --dir artifacts/$job || echo "$job artifact not found, skipping"
@@ -111,7 +112,7 @@ jobs:
           # Parse jobs from jobs.json
           jobs=$(jq -r '.[].name' .github/workflows/jobs.json)
           for job in $jobs; do
-            job_file="artifacts/$job/output.txt"
+            job_file="artifacts/$job-output.txt"
       
             # Check if the output file exists
             if [[ -f "$job_file" ]]; then
