@@ -86,6 +86,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up GitHub CLI with GITHUB_TOKEN
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+
       - name: Download all output artifacts from matrix jobs
         run: |
           jobs=$(jq -r '.[].name' .github/workflows/jobs.json)
