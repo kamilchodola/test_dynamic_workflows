@@ -95,7 +95,7 @@ jobs:
           jobs=$(jq -r '.[].name' .github/workflows/jobs.json)
           for job in $jobs; do
             echo "Downloading artifact for $job"
-            gh run download --name "$job-output-${{ github.run_id }}" --dir artifacts || echo "$job artifact not found, skipping"
+            gh run download --name "$job-output-${{ github.run_id }}" --dir artifacts/$job || echo "$job artifact not found, skipping"
           done
 
       - name: Generate Mermaid Diagram from output.txt files
@@ -107,37 +107,42 @@ jobs:
           echo "### Dependency Diagram" >> summary.md
           echo '```mermaid' >> summary.md
           echo "graph TD" >> summary.md
-          ls
-          ls artifacts
 
-          for file in $(ls artifacts); do
-            job_name=$(echo $file | sed 's/-output.*//')
-            job_status=$(cat artifacts/$file)
-            
-            # Color based on output content
-            if [[ "$job_status" == "FAILURE" ]]; then
-              echo "$job_name[$job_name - Failed]:::failed" >> summary.md
-            elif [[ "$job_status" == "FAILURE-78" ]]; then
-              echo "$job_name[$job_name - Cancelled]:::cancelled" >> summary.md
+          # Parse jobs from jobs.json
+          jobs=$(jq -r '.[].name' .github/workflows/jobs.json)
+          for job in $jobs; do
+            job_file="artifacts/$job/output.txt"
+      
+            # Check if the output file exists
+            if [[ -f "$job_file" ]]; then
+              job_status=$(cat $job_file)
+        
+              # Assign the correct node label and color class
+              if [[ "$job_status" == "FAILURE" ]]; then
+                echo "$job[$job - Failed]:::failed" >> summary.md
+              elif [[ "$job_status" == "FAILURE-78" ]]; then
+                echo "$job[$job - Cancelled]:::cancelled" >> summary.md
+              else
+                echo "$job[$job - Success]:::success" >> summary.md
+              fi
             else
-              echo "$job_name[$job_name - Success]:::success" >> summary.md
+              echo "$job[$job - No Status Found]:::unknown" >> summary.md
             fi
 
-            # Assume dependencies are inferred from filenames or pre-known
-            if [[ -f ".github/workflows/jobs.json" ]]; then
-              dependencies=$(jq -r --arg job_name "$job_name" '.[] | select(.name == $job_name) | .dependencies[]?.dependency' .github/workflows/jobs.json)
-              for dep in $dependencies; do
-                echo "$dep --> $job_name" >> summary.md
-              done
-            fi
+            # Visualize dependencies
+            dependencies=$(jq -r --arg job_name "$job" '.[] | select(.name == $job_name) | .dependencies[]?.dependency' .github/workflows/jobs.json)
+            for dep in $dependencies; do
+              echo "$dep --> $job" >> summary.md
+            done
           done
 
           echo '```' >> summary.md
-          
+    
           # Add class definitions for Mermaid diagram
           echo "classDef success fill:#4CAF50,stroke:#333,stroke-width:2px;" >> summary.md
           echo "classDef failed fill:#F44336,stroke:#333,stroke-width:2px;" >> summary.md
           echo "classDef cancelled fill:#FFC107,stroke:#333,stroke-width:2px;" >> summary.md
+          echo "classDef unknown fill:#D3D3D3,stroke:#333,stroke-width:2px;" >> summary.md
 
           # Add the summary to GitHub's special summary markdown file
           cat summary.md >> $GITHUB_STEP_SUMMARY
