@@ -116,6 +116,8 @@ jobs:
       
             # Check if the status file exists
             if [[ -f "$job_file" ]]; then
+              ls $job_file
+              cat $job_file
               job_status=$(cat $job_file)
         
               # Assign the correct node label and color class
