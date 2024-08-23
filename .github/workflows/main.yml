@@ -118,7 +118,7 @@ jobs:
               job_status=$(cat $job_file)
         
               # Assign the correct node label and color class
-              if [[ "$job_status" == "FAILURE" ]]; then
+              if [[ "$job_status" == "FAILURE-1" ]]; then
                 echo "$job[$job - Failed]:::failed" >> summary.md
               elif [[ "$job_status" == "FAILURE-78" ]]; then
                 echo "$job[$job - Cancelled]:::cancelled" >> summary.md
